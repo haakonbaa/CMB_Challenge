@@ -1,12 +1,12 @@
 #pragma once
 
-
 // For lagged fib-generator
 constexpr unsigned int word_size = 24;
 constexpr unsigned int short_lag = 10;
 constexpr unsigned int long_lag = 24;
 constexpr long unsigned int MOD32 = 4294967296u; // unødvendig
 constexpr unsigned int MOD24 = 16777216;
+constexpr unsigned int MOD24AND = MOD24-1;
 
 // For linear-congruential-generator
 unsigned int* rand_array[long_lag];
@@ -32,22 +32,21 @@ class RandomEngine {
 private:
     unsigned int _M_x[long_lag];
     unsigned int _M_carry;		///< The carry
-    size_t       _M_p;			///< Current index of x(i - r).
+    unsigned long       _M_p;			///< Current index of x(i - r).
 public:
     RandomEngine(unsigned int r_seed) {seed(r_seed);}
     RandomEngine() : RandomEngine{default_seed} {}
     void seed(unsigned int value) {
         LCG gen_lcg{value};
-        const size_t __n = (word_size + 31) / 32;
-
-        for (size_t __i = 0; __i < long_lag; ++__i)   {
+        const unsigned long __n = (word_size + 31) / 32;
+        for (unsigned long __i = 0; __i < long_lag; ++__i)   {
             unsigned int __sum = 0u;
             unsigned int __factor = 1u;
-            for (size_t __j = 0; __j < __n; ++__j) {
-                __sum += (gen_lcg()%MOD32)*__factor;
+            for (unsigned long __j = 0; __j < __n; ++__j) {
+                __sum += (gen_lcg())*__factor; // __sum += (gen_lcg()%MOD32)*__factor;
                 __factor *= 0;
             }
-            _M_x[__i] = __sum%MOD24;
+            _M_x[__i] = __sum & MOD24AND; //_M_x[__i] = __sum%MOD24;
         }
         _M_carry = (_M_x[long_lag - 1] == 0) ? 1 : 0;
         _M_p = 0;
@@ -66,39 +65,13 @@ public:
             __xi = _M_x[__ps] - _M_x[_M_p] - _M_carry;
             _M_carry = 0;
         } else {
-            //__xi = (__detail::_Shift<_UIntType, __w>::__value - _M_x[_M_p] - _M_carry + _M_x[__ps]);
             __xi = (MOD24 - _M_x[_M_p] - _M_carry + _M_x[__ps]);
             _M_carry = 1;
         }
-        _M_x[_M_p] = __xi % MOD24;
+        _M_x[_M_p] = __xi & MOD24AND;
 
         // Adjust current index to loop around in ring buffer.
         if (++_M_p >= long_lag) _M_p = 0;
         return __xi;
     }
 };
-
-
-// void seed(unsigned int* array, unsigned int seed) {
-//     const size_t __n = (word_size + 31) / 32;
-//     for (size_t __i = 0; __i < long_lag; ++__i) {
-//         unsigned int __sum = 0u;
-//         unsigned int __factor = 1u;
-//         for (size_t __j = 0; __j < __n; ++__j) {
-//                  __sum += __lcg()%MOD32 * __factor;
-//                  __factor *= __detail::_Shift<_UIntType, 32>::__value;
-//         }
-//         _M_x[__i] = __detail::__mod<_UIntType,
-//         __detail::_Shift<_UIntType, __w>::__value>(__sum);
-//     }
-//     _M_carry = (_M_x[long_lag - 1] == 0) ? 1 : 0;
-//     _M_p = 0;
-// }
-
-// printf("\n\nMINE: m_carry, m_p: %u %lu\n",_M_carry,_M_p);
-// printf("seed: %u\n",value);
-// printf("array:\n");
-// printf(typeid(_M_x).name());
-// for (unsigned int i = 0; i < long_lag; i++) {
-//     printf("%u ", _M_x[i]);
-// }

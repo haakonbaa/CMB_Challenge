@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 // For lagged fib-generator
 constexpr unsigned int word_size = 24;
 constexpr unsigned int short_lag = 10;
@@ -15,8 +17,8 @@ unsigned int* rand_array[long_lag];
 constexpr unsigned int lcg_a = 40014u;
 constexpr unsigned int lcg_m = 2147483563u;
 constexpr unsigned int default_seed = 19780503U;
-
-unsigned long int lcg_value = default_seed;
+ 
+unsigned long long int lcg_value = default_seed; // må ha minst 8 bytes! (for en eller annen grunn) 
 
 inline unsigned int LCG() {
     lcg_value = (lcg_a*lcg_value)%lcg_m;
@@ -54,4 +56,30 @@ inline unsigned int get_random() {
     // Adjust current index to loop around in ring buffer.
     if (++_M_p >= long_lag) _M_p = 0;
     return __xi;
+}
+
+constexpr unsigned int range = 16777216U;
+
+inline int random(int to) {
+    float fTmp = (float)(get_random())/range;
+    return (fTmp * (to + 1));
+}
+
+int main() {
+    unsigned int S;
+    int MX,rnum,N;
+    int last = -1;
+    int reps = 0;
+    int count = 0;
+    if (scanf("%d%d%u",&N,&MX,&S) != 3) return 0;
+    seed(S);
+    while (true) {
+        rnum = random(MX);
+        rnum == last ? reps++:(reps=1);
+        if (reps == N) break;
+        last = rnum;
+        count++;
+    }
+    printf("%d %d\n",++count,last);
+    return 0;
 }

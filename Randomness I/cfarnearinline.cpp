@@ -66,21 +66,73 @@ inline int random(int to) {
     return (fTmp * (to + 1));
 }
 
+constexpr unsigned int BASE10[12] = {
+    0x00000001, 0x0000000a,
+    0x00000064, 0x000003e8,
+    0x00002710, 0x000186a0,
+    0x000f4240, 0x00989680,
+    0x05f5e100, 0x3b9aca00,
+    0,0
+};
+
+constexpr unsigned char SPACE = ' ';
+constexpr unsigned char NEWLINE = '\n';
+constexpr unsigned char EOL = '\0';
+constexpr unsigned char ZERO = '0';
+
+inline void getint(unsigned int& num) {
+    num = 0;
+    unsigned char* number = new unsigned char[12];
+    unsigned int radix = 0;
+    unsigned char c = getchar();
+    while (c < ZERO) c = getchar();
+    while (c >= ZERO && radix < 12) {
+        number[radix] = (c-ZERO);
+        radix++;
+        c = getchar();
+    }
+    for (unsigned int i = 0; i < radix; i++) {
+        num += (number[i])*BASE10[radix-i-1];
+    }
+    delete[] number;
+}
+
 int main() {
-    unsigned int S;
-    int MX,rnum,N;
+    unsigned int N,MX,S;
+    int rnum;
     int last = -1;
     int reps = 0;
     int count = 0;
-    std::cin >> N >> MX >> S;
-    seed(S);
-    while (true) {
-        rnum = random(MX);
-        rnum == last ? reps++:(reps=1);
-        if (reps == N) break;
-        last = rnum;
-        count++;
+    // getint(N);
+    // getint(MX);
+    // getint(S);
+    //seed(S);
+    printf("\nTEST\n");
+    N = 2;
+    MX = 5;
+    for (N = 1; N < 5; N++) {
+        for (MX = 1; MX < 12; MX ++) {
+            for (S = 1; S < 1000000; S ++) {
+                seed(S);
+                last = -1;
+                reps = 0;
+                count = 0;
+                while (true) {
+                    rnum = random(MX);
+                    rnum == last ? reps++:(reps=1);
+                    if (reps == N) break;
+                    last = rnum;
+                    count++;
+                }
+                //printf("%d %d\n",++count,last);
+                if (++count == 921 && last == 4) {
+                    std::cout << N << ' ' << MX << ' ' << S << '\n'; 
+                    //return 0;
+                }
+            }
+        }
     }
+    printf("DONE!\n");
     printf("%d %d\n",++count,last);
     return 0;
 }

@@ -1,6 +1,6 @@
 #include <random>
 #include <iostream>
-#include <inlinegenerator.h>
+#include <laggedfibgeneratorui.h>
 
 std::subtract_with_carry_engine<unsigned int, 24, 10, 24> random_engine;
 

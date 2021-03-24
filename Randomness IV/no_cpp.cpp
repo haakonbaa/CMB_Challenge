@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <iostream>
 
 // For lagged fib-generator
 constexpr unsigned int word_size = 24;
@@ -61,32 +60,40 @@ inline unsigned int get_random() {
 
 constexpr unsigned int range = 16777216U;
 
-inline int random(int to) {
+inline unsigned char random(int to) {
     float fTmp = (float)(get_random())/range;
     return (fTmp * (to + 1));
 }
 
-constexpr unsigned int BASE10[12] = {
+constexpr unsigned int BASE10[10] = {
     0x00000001, 0x0000000a,
     0x00000064, 0x000003e8,
     0x00002710, 0x000186a0,
     0x000f4240, 0x00989680,
-    0x05f5e100, 0x3b9aca00,
-    0,0
+    0x05f5e100, 0x3b9aca00
 };
 
-constexpr unsigned char SPACE = ' ';
-constexpr unsigned char NEWLINE = '\n';
-constexpr unsigned char EOL = '\0';
 constexpr unsigned char ZERO = '0';
+constexpr unsigned char NINE = '9';
+constexpr unsigned char TONUM = 0x0f;
+
+// inline void getint(unsigned int& num) {
+//     num = 0;
+//     unsigned char c = getchar();
+//     while (c < ZERO || c > NINE ) c = getchar();
+//     while (c >= ZERO && c <= NINE) {
+//         num  = num*10 + (c & TONUM);
+//         c = getchar();
+//     }
+// }
 
 inline void getint(unsigned int& num) {
     num = 0;
-    unsigned char* number = new unsigned char[12];
+    unsigned char* number = new unsigned char[10];
     unsigned int radix = 0;
     unsigned char c = getchar();
-    while (c < ZERO) c = getchar();
-    while (c >= ZERO && radix < 12) {
+    while (c < ZERO || c > NINE ) c = getchar();
+    while (c >= ZERO && c <= NINE) {
         number[radix] = (c-ZERO);
         radix++;
         c = getchar();
@@ -98,41 +105,51 @@ inline void getint(unsigned int& num) {
 }
 
 int main() {
-    unsigned int N,MX,S;
-    int rnum;
-    int last = -1;
-    int reps = 0;
-    int count = 0;
-    // getint(N);
-    // getint(MX);
-    // getint(S);
-    //seed(S);
-    printf("\nTEST\n");
-    N = 2;
-    MX = 5;
-    for (N = 1; N < 5; N++) {
-        for (MX = 1; MX < 12; MX ++) {
-            for (S = 1; S < 1000000; S ++) {
-                seed(S);
-                last = -1;
-                reps = 0;
-                count = 0;
-                while (true) {
-                    rnum = random(MX);
-                    rnum == last ? reps++:(reps=1);
-                    if (reps == N) break;
-                    last = rnum;
-                    count++;
+    unsigned int C,MX,S;
+    getint(C);
+    unsigned int N;
+    for (unsigned int i = 0; i < C; i++) {
+        // get input / seed
+        getint(N);
+        getint(MX);
+        getint(S);
+        seed(S);
+        // generate array
+        unsigned char* array = new unsigned char[N+1];
+        for (unsigned int i = 0; i < N; i++) array[i] = random(MX);
+        // START LOOP
+        //Result values
+        unsigned int len_seq = 1;
+        unsigned int start_first = 0;
+        unsigned int start_second = 0;
+
+        // temporary values
+        unsigned int _len;
+
+
+        const unsigned char* ARRAY_END = array + N;
+        unsigned char* at_left;
+        unsigned char* at_right;
+
+        // looper pekeren til venstre fra 0 til N i arrayen
+        for (at_left = array; at_left < ARRAY_END-1;at_left++) {
+            // Looper pekeren til høyre fra peker_venstre + 1 til slutten
+            for (at_right = at_left + 1; at_right < ARRAY_END; at_right++) {
+                if (*at_left != *at_right) continue;
+                _len = 1;
+                while (at_right+_len < ARRAY_END) {
+                    if ( at_left[_len] != at_right[_len]) break;
+                    _len++;
                 }
-                //printf("%d %d\n",++count,last);
-                if (++count == 921 && last == 4) {
-                    std::cout << N << ' ' << MX << ' ' << S << '\n'; 
-                    //return 0;
+                if (_len > len_seq) {
+                    len_seq = _len;
+                    start_first = (unsigned int)(at_left-array);
+                    start_second = (unsigned int)(at_right-array);
                 }
             }
         }
+        printf("%u %u %u\n",len_seq,start_first,start_second);
+        delete[] array;
     }
-    printf("DONE!\n");
-    printf("%d %d\n",++count,last);
     return 0;
 }

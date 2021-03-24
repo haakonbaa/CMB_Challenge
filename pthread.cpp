@@ -1,7 +1,7 @@
 #include <iostream>
 #include <pthread.h>
 
-void* PrintHello(void *threadid) {
+void* magic(void *threadid) {
    int* args = (int *)threadid;
    std::cout << "Hello World! Thread ID, " << args[1] << '\n';
    pthread_exit(NULL);

@@ -75,7 +75,8 @@ constexpr unsigned int BASE10[10] = {
 
 constexpr unsigned char ZERO = '0';
 constexpr unsigned char NINE = '9';
-constexpr unsigned char TONUM = 0x0f;
+constexpr unsigned char TONUM = 0x0f; // ascii-verdi til num
+
 
 inline void getint(unsigned int& num) {
     num = 0;
@@ -87,53 +88,49 @@ inline void getint(unsigned int& num) {
     }
 }
 
+constexpr int MEMORY = 1000000000; // absolutt ikke bra :) 
+
+inline bool notIsSequence(unsigned char* const arr1, unsigned char* const arr2, const unsigned int& len ) {
+    unsigned i;
+    for (i = 0; i < len; i++) {
+        if (arr1[i] != arr2[i]) return true;
+    }
+    return false; 
+}
+
+inline void magic(unsigned int N, unsigned int MX, unsigned int S) {
+    seed(S);
+    unsigned int count = 0;
+    unsigned char* arr = new unsigned char[MEMORY];
+
+    for (unsigned int i = 0; i < 2*N; i++) {
+        arr[i] = random(MX);
+    }
+    count = 2*N;
+
+    while (notIsSequence(&arr[count-N-N],&arr[count-N],N)) {
+        arr[count] = random(MX);
+        count++;
+    }
+
+    printf("%u",count);
+    for (unsigned int i = 0; i < N; i++) {
+        printf(" %u", arr[count-N+i]);
+    }
+    printf("\n");
+
+    delete[] arr;
+}
 
 int main() {
-    unsigned int C,MX,S;
+    unsigned int C;
     getint(C);
-    unsigned int N;
-    for (unsigned int i = 0; i < C; i++) {
-        // get input / seed
+    unsigned int N, MX, S;
+    for (unsigned int c = 0; c < C; c++) {
         getint(N);
         getint(MX);
         getint(S);
-        seed(S);
-        // generate array
-        unsigned char* array = new unsigned char[N+1];
-        for (unsigned int i = 0; i < N; i++) array[i] = random(MX);
-        // START LOOP
-        //Result values
-        unsigned int len_seq = 1;
-        unsigned int start_first = 0;
-        unsigned int start_second = 0;
-
-        // temporary values
-        unsigned int _len;
-
-
-        const unsigned char* ARRAY_END = array + N;
-        unsigned char* at_left;
-        unsigned char* at_right;
-
-        // looper pekeren til venstre fra 0 til N i arrayen
-        for (at_left = array; at_left < ARRAY_END-1;at_left++) {
-            // Looper pekeren til høyre fra peker_venstre + 1 til slutten
-            for (at_right = at_left + 1; at_right < ARRAY_END; at_right++) {
-                if (*at_left != *at_right) continue;
-                _len = 1;
-                while (at_right+_len < ARRAY_END) {
-                    if ( at_left[_len] != at_right[_len]) break;
-                    _len++;
-                }
-                if (_len > len_seq) {
-                    len_seq = _len;
-                    start_first = (unsigned int)(at_left-array);
-                    start_second = (unsigned int)(at_right-array);
-                }
-            }
-        }
-        printf("%u %u %u\n",len_seq,start_first,start_second);
-        delete[] array;
+        magic(N,MX,S);
     }
     return 0;
 }

@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include<stdio.h>
+#include<omp.h>
 
 // For lagged fib-generator
 constexpr unsigned int word_size = 24;
@@ -60,11 +61,14 @@ inline unsigned int get_random() {
 
 constexpr unsigned int range = 16777216U;
 
-inline unsigned char random(int to) {
-    float fTmp = (float)(get_random())/range;
-    return (fTmp * (to + 1));
+inline unsigned int random( unsigned int to) {
+  float fTmp = static_cast<float>(get_random()) / range;
+  return (fTmp * (to + 1));
 }
 
+constexpr unsigned char ZERO = '0';
+constexpr unsigned char NINE = '9';
+constexpr unsigned char TONUM = 0x0f;
 constexpr unsigned int BASE10[10] = {
     0x00000001, 0x0000000a,
     0x00000064, 0x000003e8,
@@ -73,20 +77,22 @@ constexpr unsigned int BASE10[10] = {
     0x05f5e100, 0x3b9aca00
 };
 
-constexpr unsigned char ZERO = '0';
-constexpr unsigned char NINE = '9';
-constexpr unsigned char TONUM = 0x0f;
-
 inline void getint(unsigned int& num) {
     num = 0;
+    unsigned char* number = new unsigned char[10];
+    unsigned int radix = 0;
     unsigned char c = getchar();
     while (c < ZERO || c > NINE ) c = getchar();
     while (c >= ZERO && c <= NINE) {
-        num  = num*10 + (c & TONUM);
+        number[radix] = (c-ZERO);
+        radix++;
         c = getchar();
     }
+    for (unsigned int i = 0; i < radix; i++) {
+        num += (number[i])*BASE10[radix-i-1];
+    }
+    delete[] number;
 }
-
 
 int main() {
     unsigned int C,MX,S;
